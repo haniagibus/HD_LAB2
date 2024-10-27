@@ -1,16 +1,28 @@
 from faker import Faker
 import csv
 import random
-fake = Faker()
+fake = Faker("pl_PL")
 
-dane_wizyty=[]
+# ilosc_numerow = 1000  # Liczba unikalnych numerów
+# zakres = range(100000000, 999999999)
+# # Generowanie unikalnych 9-cyfrowych numerów
+# unikalne_numery = random.sample(zakres, ilosc_numerow)
+
+dane_pacjenci=[]
 #Pacjenci
-for i in range(1000):
-    ID_pacjenta=random.randint(1000000900,999999999)
-    dane_wizyty.append(ID_pacjenta, fake.name())
+with open("dane_pacjenci.csv", mode="w", newline="") as pacjenci_csv:
+    writer = csv.writer(pacjenci_csv)
 
-for i in range(1000):
-    print(f"{i}: {dane_wizyty[i]}")
+    for i in range(100):
+        ID_pacjenta = fake.unique.random_int(100000000, 999999999)
+        imie = fake.first_name()
+        nazwisko = fake.last_name()
+        nr_telefonu = fake.phone_number()
+        miejscowosc = fake.city()
+        ulica_i_numer_domu = fake.street_address()
+        pesel = fake.unique.random_int(10000000000, 99999999999)
+
+        writer.writerow([ID_pacjenta, imie, nazwisko, nr_telefonu, miejscowosc,ulica_i_numer_domu,pesel])
 
 
 # # Zapis do pliku CSV
