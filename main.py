@@ -5,7 +5,6 @@ import csv
 import random
 import string
 
-
 specjalization_provider = DynamicProvider(
      provider_name="medical_specialization",
      elements=[ "Kardiolog", "Pediatra", "Ginekolog", "Dermatolog", "Neurolog",
@@ -19,6 +18,55 @@ specjalization_provider = DynamicProvider(
 
 fake = Faker("pl_PL")
 fake.add_provider(specjalization_provider)
+
+my_sentence_list = [
+    'Pacjenta boli brzuch.',
+    'Pacjent skarży się na ból głowy.',
+    'Pacjent ma gorączkę i dreszcze.',
+    'Pacjent odczuwa osłabienie.',
+    'Pacjent ma duszności i kaszel.',
+    'Pacjent zgłasza katar i ból gardła.',
+    'Pacjent ma zawroty głowy.',
+    'Pacjent skarży się na wymioty.',
+    'Pacjent ma biegunkę.',
+    'Pacjent zgłasza ból mięśni i stawów.',
+    'Pacjent odczuwa pieczenie oczu.',
+    'Pacjent ma problemy z trawieniem.',
+    'Pacjent zgłasza opuchliznę nóg.',
+    'Pacjent odczuwa swędzenie skóry.',
+    'Pacjent ma wysokie ciśnienie krwi.',
+    'Pacjent ma problemy ze wzrokiem.',
+    'Pacjent odczuwa zmęczenie i senność.',
+    'Pacjent ma ból zęba.',
+    'Pacjent skarży się na bóle kręgosłupa.',
+    'Pacjent zgłasza łzawienie oczu.',
+    'Pacjent odczuwa drżenie rąk.',
+    'Pacjent ma objawy przeziębienia.',
+    'Pacjent skarży się na ból zatok.',
+    'Pacjent odczuwa bóle brzucha po jedzeniu.',
+    'Pacjent zgłasza trudności w oddychaniu.',
+    'Pacjent ma swędzenie i zaczerwienienie skóry.',
+    'Pacjent skarży się na szumy uszne.',
+    'Pacjent odczuwa silne bóle w klatce piersiowej.',
+    'Pacjent ma problem z pamięcią.',
+    'Pacjent zgłasza uczucie niepokoju.',
+    'Pacjent ma problemy ze snem.',
+    'Pacjent skarży się na ból w stawie kolanowym.',
+    'Pacjent ma zgagę.',
+    'Pacjent odczuwa dreszcze bez gorączki.',
+    'Pacjent ma wrażliwość na światło.',
+    'Pacjent skarży się na bóle w odcinku szyjnym kręgosłupa.',
+    'Pacjent zgłasza bóle głowy przy wysiłku.',
+    'Pacjent ma problemy z równowagą.',
+    'Pacjent odczuwa sztywność mięśni.',
+    'Pacjent ma objawy alergii pokarmowej.',
+    'Pacjent zgłasza trudności w przełykaniu.',
+    'Pacjent odczuwa ból w klatce piersiowej przy głębokim wdechu.',
+    'Pacjent ma mrowienie w kończynach.',
+    'Pacjent zgłasza częste bóle głowy związane z migreną.',
+    'Pacjent skarży się na kłopoty z koncentracją.',
+    'Pacjent ma napady paniki.'
+]
 
 def generate_unique_identifier(existing_ids, length):
     """Generuje unikalny identyfikator o podanej długości."""
@@ -77,9 +125,15 @@ with open("dane_wizyty.csv", mode="w", newline="") as wizyty_csv:
         ID_wizyty = generate_unique_identifier(existing_ids,10)
         data_umówienia = fake.date_between(start_date=start_date,end_date=end_date)
         data_rozpoczęcia = fake.date_between(start_date= data_umówienia,end_date=data_umówienia + timedelta(days=180))
-        dolegliwosci=""
+        dolegliwosci=fake.sentence(ext_word_list=my_sentence_list)
+        assert len(dolegliwosci) <= 1000
         kwota=round(random.uniform(40, 600), 2)
         godzina = generate_random_time_within_range()
         czy_odbyta = random.choices(["TAK", "NIE"], weights=[0.7, 0.3], k=1)[0]
         ID_recepcjonistki= random.choice(recepcjonistki)
         writer.writerow([ID_wizyty, data_umówienia,data_rozpoczęcia,dolegliwosci, kwota, godzina,czy_odbyta,ID_recepcjonistki])
+
+
+# Oświadczamy, że treści wygenerowane przy pomocy z GenAI poddałyśmy krytycznej analizie i zweryfikowałyśmy.
+# Korzystałyśmy za zgodą prowadzącego z następujących narzędzi o potencjalnie wysokim stopniu ingerencji:
+# ChatGPT - wygenerowanie danych dla: my_sentence_list, specjalization_provider
