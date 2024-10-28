@@ -211,8 +211,7 @@ with open("dane_wizyty.csv", mode="w", newline="") as wizyty_csv:
         ID_recepcjonistki= random.choice(recepcjonistki)
         ID_pacjenta= random.choice(id_wszyscy_pacjenci)
         ID_lekarza= random.choice(id_wszyscy_lekarze)
-        writer.writerow([ID_wizyty, data_umówienia,
-                         ,dolegliwosci, kwota, godzina,czy_odbyta,ID_recepcjonistki,ID_pacjenta, ID_lekarza])
+        writer.writerow([ID_wizyty, data_umowienia,dolegliwosci, kwota, godzina,czy_odbyta,ID_recepcjonistki,ID_pacjenta, ID_lekarza])
 
         
 #Recepty
