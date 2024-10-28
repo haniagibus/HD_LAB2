@@ -23,7 +23,7 @@ fake = Faker("pl_PL")
 fake.add_provider(positions_provider)
 fake.add_provider(shifts_provider)
 
-
+size=1000
 def generate_unique_identifier(existing_ids, length):
     while True:
         identifier = ''.join(random.choices(string.ascii_letters + string.digits, k=length))
@@ -57,7 +57,7 @@ def generate_data(t):
 
     if t == 1:
         # Arkusz 1
-        for _ in range(1000):
+        for _ in range(size):
             ID = generate_unique_identifier(existing_ids, 12)
             PESEL = fake.unique.random_int(10000000000, 99999999999)
             imie = fake.first_name()
@@ -77,10 +77,10 @@ def generate_data(t):
         workbook.save(dir + "excel_dyrektora.xlsx")
 
         # Arkusz 2
-        pracownicy_ids = pd.read_excel("excel_dyrektora.xlsx", usecols="A")
-        pracownicy_names = pd.read_excel("excel_dyrektora.xlsx", usecols="B")
-        pracownicy_surnames = pd.read_excel("excel_dyrektora.xlsx", usecols="C")
-        pracownicy_positions = pd.read_excel("excel_dyrektora.xlsx", usecols="D")
+        pracownicy_ids = pd.read_excel(dir + "excel_dyrektora.xlsx", usecols="A")
+        pracownicy_names = pd.read_excel(dir + "excel_dyrektora.xlsx", usecols="B")
+        pracownicy_surnames = pd.read_excel(dir + "excel_dyrektora.xlsx", usecols="C")
+        pracownicy_positions = pd.read_excel(dir + "excel_dyrektora.xlsx", usecols="D")
 
         sheet = workbook.create_sheet("Harmonogram")
 
@@ -91,7 +91,7 @@ def generate_data(t):
 
         sheet.append(headers)
 
-        for i in range(1000):
+        for i in range(size):
             ID = pracownicy_ids.iloc[i, 0]
             imie = pracownicy_names.iloc[i, 0]
             nazwisko = pracownicy_surnames.iloc[i, 0]
