@@ -12,10 +12,6 @@ import string
 import openpyxl
 import pandas as pd
 
-# time=1 --> t1
-# time=2 --> t2
-time = 1
-
 specjalization_provider = DynamicProvider(
     provider_name="medical_specialization",
     elements=["Kardiolog", "Pediatra", "Ginekolog", "Dermatolog", "Neurolog",
@@ -115,7 +111,6 @@ badania = [
 
 
 def generate_unique_identifier(existing_ids, length):
-    """Generuje unikalny identyfikator o podanej długości."""
     while True:
         identifier = ''.join(random.choices(string.ascii_letters + string.digits, k=length))
         if identifier not in existing_ids:  # Sprawdzenie, czy identyfikator jest unikalny
@@ -123,7 +118,6 @@ def generate_unique_identifier(existing_ids, length):
             return identifier
 
 def generate_random_time_within_range(start_hour=7, end_hour=19):
-    """Generuje losowy czas w przedziale od start_hour do end_hour."""
     hour = random.randint(start_hour, end_hour)
     minute = random.choice([0, 10, 20, 30, 40, 50])
     return f"{hour:02d}:{minute:02d}"
@@ -138,32 +132,23 @@ def biased_random_int(low, high, bias=0.9):
         return fake.random_int(min=(low + high) // 8 + 1, max=high)
 
 
-# czas
-t1_start = datetime.strptime('2018-01-01', '%Y-%m-%d').date()
-t1_end = datetime.strptime('2022-01-01', '%Y-%m-%d').date()
-t2_start = datetime.strptime('2022-01-02', '%Y-%m-%d').date()
-t2_end = datetime.strptime('2024-01-01', '%Y-%m-%d').date()
-
-if (time == 1):
-    time_start = t1_start
-    time_end = t1_end
-else:
-    time_start = t2_start
-    time_end = t2_end
-
 existing_ids = set()
-
-excel = openpyxl.load_workbook("excel_dyrektora.xlsx")
-pracownicy = excel["Pracownicy"]
 
 
 def generate_data(t):
     if t == 1:
         dir = ".\\t1\\"
         mode = "w"
+        time_start = datetime.strptime('2018-01-01', '%Y-%m-%d').date()
+        time_end = datetime.strptime('2022-01-01', '%Y-%m-%d').date()
     else:
         dir = ".\\t2\\"
         mode = "a"
+        time_start = datetime.strptime('2022-01-02', '%Y-%m-%d').date()
+        time_end = datetime.strptime('2024-01-01', '%Y-%m-%d').date()
+
+    excel = openpyxl.load_workbook(dir + "excel_dyrektora.xlsx")
+    pracownicy = excel["Pracownicy"]
 
     # Pacjenci
     with open(dir + "dane_pacjenci.csv", mode=mode, newline="") as pacjenci_csv:
