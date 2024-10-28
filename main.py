@@ -1,3 +1,7 @@
+import os
+import shutil
+from time import sleep
+
 import pandas as pd
 from faker import Faker
 from faker.providers import DynamicProvider
@@ -75,6 +79,40 @@ my_sentence_list = [
     'Pacjent ma napady paniki.'
 ]
 
+badania = [
+    "morfologia krwi",
+    "tomografia komputerowa",
+    "badanie moczu",
+    "USG jamy brzusznej",
+    "EKG (elektrokardiogram)",
+    "EEG (elektroencefalogram)",
+    "test na cholesterol",
+    "badanie poziomu cukru",
+    "badanie wzroku",
+    "spirometria",
+    "badanie słuchu",
+    "próba wysiłkowa",
+    "RTG klatki piersiowej",
+    "mammografia",
+    "test na HIV",
+    "badanie poziomu witaminy D",
+    "test PSA",
+    "badanie TSH (tarczyca)",
+    "test na alergie",
+    "markery nowotworowe",
+    "biopsja skóry",
+    "densytometria (gęstość kości)",
+    "badanie kału",
+    "test wątrobowy",
+    "test nerkowy",
+    "badanie prostaty",
+    "test na anemię",
+    "glukoza na czczo",
+    "posiew bakteryjny",
+    "test na infekcje",
+    "badanie hormonów"
+]
+
 
 def generate_unique_identifier(existing_ids, length):
     """Generuje unikalny identyfikator o podanej długości."""
@@ -117,145 +155,138 @@ else:
 existing_ids = set()
 
 excel = openpyxl.load_workbook("excel_dyrektora.xlsx")
-pracownicy = excel.get_sheet_by_name("Pracownicy")
+pracownicy = excel["Pracownicy"]
 
-# Pacjenci
-with open("dane_pacjenci.csv", mode="w", newline="") as pacjenci_csv:
-    writer = csv.writer(pacjenci_csv)
-    writer.writerow(["ID_pacjenta", "Imię", "Nazwisko", "Nr_telefonu", "Miejscowość", "Ulica_i_numer_domu", "Pesel"])
 
-    for i in range(100):
-        ID_pacjenta = fake.unique.random_int(100000000, 999999999)
-        imie = fake.first_name()
-        nazwisko = fake.last_name()
-        nr_telefonu = fake.unique.numerify("### ### ###")
-        miejscowosc = fake.city()
-        ulica_i_numer_domu = fake.street_address()
-        pesel = fake.unique.random_int(10000000000, 99999999999)
+def generate_data(t):
+    if t == 1:
+        dir = ".\\t1\\"
+        mode = "w"
+    else:
+        dir = ".\\t2\\"
+        mode = "a"
 
-        writer.writerow([ID_pacjenta, imie, nazwisko, nr_telefonu, miejscowosc, ulica_i_numer_domu, pesel])
+    # Pacjenci
+    with open(dir + "dane_pacjenci.csv", mode=mode, newline="") as pacjenci_csv:
+        writer = csv.writer(pacjenci_csv)
+        if t == 1:
+            writer.writerow(["ID_pacjenta", "Imię", "Nazwisko", "Nr_telefonu",
+                             "Miejscowość", "Ulica_i_numer_domu", "Pesel"])
 
-# Lekarze
-with open("dane_lekarze.csv", mode="w", newline="") as lekarze_csv:
-    writer = csv.writer(lekarze_csv)
-    writer.writerow(["Identyfikator", "Imię", "Nazwisko", "Specjalizacja"])
+        for i in range(100):
+            ID_pacjenta = fake.unique.random_int(100000000, 999999999)
+            imie = fake.first_name()
+            nazwisko = fake.last_name()
+            nr_telefonu = fake.unique.numerify("### ### ###")
+            miejscowosc = fake.city()
+            ulica_i_numer_domu = fake.street_address()
+            pesel = fake.unique.random_int(10000000000, 99999999999)
 
+            writer.writerow([ID_pacjenta, imie, nazwisko, nr_telefonu, miejscowosc, ulica_i_numer_domu, pesel])
+
+    # Lekarze
+    with open(dir + "dane_lekarze.csv", mode=mode, newline="") as lekarze_csv:
+        writer = csv.writer(lekarze_csv)
+        if t == 1:
+            writer.writerow(["Identyfikator", "Imię", "Nazwisko", "Specjalizacja"])
+
+        for row in pracownicy.iter_rows(min_row=2, values_only=True):
+            identyfikator, pesel, imie, nazwisko, data_urodzenia, stanowisko, data_zatrudnienia, data_zwolnienia = row
+            if stanowisko == 'lekarz':
+                specjalizacja = fake.medical_specialization()
+                writer.writerow([identyfikator, imie, nazwisko, specjalizacja])
+
+    lekarze_file = pd.read_csv(dir + "dane_lekarze.csv", encoding="windows-1250")
+    pacjenci_file = pd.read_csv(dir + "dane_pacjenci.csv", encoding="windows-1250")
+
+    id_wszyscy_pacjenci = pacjenci_file['ID_pacjenta'].tolist()
+    id_wszyscy_lekarze = lekarze_file['Identyfikator'].tolist()
+
+    # Badania
+    with open(dir + "dane_badania.csv", mode=mode, newline="") as badania_csv:
+        writer = csv.writer(badania_csv)
+        if t == 1:
+            writer.writerow(["nazwa_badania", "czas_trwania", "koszt"])
+
+        for i in range(len(badania)):
+            nazwa_badania = badania[i]
+            czas_trwania = fake.random_int(5, 300, 5)
+            koszt = biased_random_int(0, 10000)
+
+            writer.writerow([nazwa_badania, czas_trwania, koszt])
+
+    # Wizyty
+    recepcjonistki = []
     for row in pracownicy.iter_rows(min_row=2, values_only=True):
         identyfikator, pesel, imie, nazwisko, data_urodzenia, stanowisko, data_zatrudnienia, data_zwolnienia = row
-        if stanowisko == 'lekarz':
-            specjalizacja = fake.medical_specialization()
-            writer.writerow([identyfikator, imie, nazwisko, specjalizacja])
-lekarze_file = pd.read_csv("dane_lekarze.csv", encoding="windows-1250")
-pacjenci_file = pd.read_csv("dane_pacjenci.csv", encoding="windows-1250")
+        if stanowisko == 'recepcja':
+            recepcjonistki.append(identyfikator)
 
-id_wszyscy_pacjenci = pacjenci_file['ID_pacjenta'].tolist()
-id_wszyscy_lekarze = lekarze_file['Identyfikator'].tolist()
+    with open(dir + "dane_wizyty.csv", mode=mode, newline="") as wizyty_csv:
+        writer = csv.writer(wizyty_csv)
+        if t == 1:
+            writer.writerow(["ID_wizyty", "data_umówienia", "data_rozpoczecia", "dolegliwosci", "kwota", "godzina",
+                             "czy_odbyta", "ID_recepcjonistki", "ID_pacjenta", "ID_lekarza"])
 
-# Badania
-with open("dane_badania.csv", mode="w", newline="") as badania_csv:
-    writer = csv.writer(badania_csv)
-    writer.writerow(["nazwa_badania", "czas_trwania", "koszt"])
+        for i in range(1000):
+            ID_wizyty = generate_unique_identifier(existing_ids, 10)
+            data_umowienia = fake.date_between(time_start, time_end - timedelta(days=180))
+            data_rozpoczecia = fake.date_between(start_date=data_umowienia,
+                                                 end_date=data_umowienia + timedelta(days=180))
+            dolegliwosci = fake.sentence(ext_word_list=my_sentence_list)
+            assert len(dolegliwosci) <= 1000
+            kwota = round(random.uniform(40, 600), 2)
+            godzina = generate_random_time_within_range()
+            czy_odbyta = random.choices(["TAK", "NIE"], weights=[0.7, 0.3], k=1)[0]
+            ID_recepcjonistki = random.choice(recepcjonistki)
+            ID_pacjenta = random.choice(id_wszyscy_pacjenci)
+            ID_lekarza = random.choice(id_wszyscy_lekarze)
+            writer.writerow(
+                [ID_wizyty, data_umowienia, data_rozpoczecia, dolegliwosci, kwota, godzina, czy_odbyta,
+                 ID_recepcjonistki,
+                 ID_pacjenta, ID_lekarza])
 
-    badania = [
-        "morfologia krwi",
-        "tomografia komputerowa",
-        "badanie moczu",
-        "USG jamy brzusznej",
-        "EKG (elektrokardiogram)",
-        "EEG (elektroencefalogram)",
-        "test na cholesterol",
-        "badanie poziomu cukru",
-        "badanie wzroku",
-        "spirometria",
-        "badanie słuchu",
-        "próba wysiłkowa",
-        "RTG klatki piersiowej",
-        "mammografia",
-        "test na HIV",
-        "badanie poziomu witaminy D",
-        "test PSA",
-        "badanie TSH (tarczyca)",
-        "test na alergie",
-        "markery nowotworowe",
-        "biopsja skóry",
-        "densytometria (gęstość kości)",
-        "badanie kału",
-        "test wątrobowy",
-        "test nerkowy",
-        "badanie prostaty",
-        "test na anemię",
-        "glukoza na czczo",
-        "posiew bakteryjny",
-        "test na infekcje",
-        "badanie hormonów"
-    ]
+    wizyty_file = pd.read_csv(dir + "dane_wizyty.csv", encoding='windows-1250')
+    badania_file = pd.read_csv(dir + "dane_badania.csv", encoding='windows-1250')
 
-    for i in range(len(badania)):
-        nazwa_badania = badania[i]
-        czas_trwania = fake.random_int(5, 300, 5)
-        koszt = biased_random_int(0, 10000)
+    wizyty_ids = wizyty_file['ID_wizyty'].tolist()
+    badania_names = badania_file['nazwa_badania'].tolist()
 
-        writer.writerow([nazwa_badania, czas_trwania, koszt])
+    # Recepty
+    with open(dir + "dane_recepty.csv", mode=mode, newline="") as recepty_csv:
+        writer = csv.writer(recepty_csv)
+        if t == 1:
+            writer.writerow(["ID_recepty", "waznosc", "czy_wykupiona", "data_wystawienia", "id_wizyty"])
 
-# Wizyty
-recepcjonistki = []
-for row in pracownicy.iter_rows(min_row=2, values_only=True):
-    identyfikator, pesel, imie, nazwisko, data_urodzenia, stanowisko, data_zatrudnienia, data_zwolnienia = row
-    if stanowisko == 'recepcja':
-        recepcjonistki.append(identyfikator)
+        for i in range(100):
+            ID_recepty = fake.unique.random_int(100000000000000, 999999999999999)
+            waznosc = fake.random_int(30, 180, 30)
+            czy_wykupiona = fake.boolean()
+            data_wystawienia = fake.date_between(time_start, time_end)
+            id_wizyty = random.choice(wizyty_ids)
 
-with open("dane_wizyty.csv", mode="w", newline="") as wizyty_csv:
-    writer = csv.writer(wizyty_csv)
-    writer.writerow(
-        ["ID_wizyty", "data_umówienia", "data_rozpoczecia", "dolegliwosci", "kwota", "godzina", "czy_odbyta",
-         "ID_recepcjonistki", "ID_pacjenta", "ID_lekarza"])
+            writer.writerow([ID_recepty, waznosc, czy_wykupiona, data_wystawienia, id_wizyty])
 
-    for i in range(1000):
-        ID_wizyty = generate_unique_identifier(existing_ids, 10)
-        data_umowienia = fake.date_between(time_start, time_end-timedelta(days=180))
-        data_rozpoczecia = fake.date_between(start_date=data_umowienia, end_date=data_umowienia + timedelta(days=180))
-        dolegliwosci = fake.sentence(ext_word_list=my_sentence_list)
-        assert len(dolegliwosci) <= 1000
-        kwota = round(random.uniform(40, 600), 2)
-        godzina = generate_random_time_within_range()
-        czy_odbyta = random.choices(["TAK", "NIE"], weights=[0.7, 0.3], k=1)[0]
-        ID_recepcjonistki = random.choice(recepcjonistki)
-        ID_pacjenta = random.choice(id_wszyscy_pacjenci)
-        ID_lekarza = random.choice(id_wszyscy_lekarze)
-        writer.writerow(
-            [ID_wizyty, data_umowienia, data_rozpoczecia, dolegliwosci, kwota, godzina, czy_odbyta, ID_recepcjonistki,
-             ID_pacjenta, ID_lekarza])
+    # Zlecenia
+    with open(dir + "dane_zlecen.csv", mode=mode, newline="") as zlecenia_csv:
+        writer = csv.writer(zlecenia_csv)
+        if t == 1:
+            writer.writerow(["ID_wizyty", "nazwa_badania"])
 
-wizyty_file = pd.read_csv("dane_wizyty.csv", encoding='windows-1250')
-badania_file = pd.read_csv("dane_badania.csv", encoding='windows-1250')
+        for i in range(1000):
+            ID_wizyty = random.choice(wizyty_ids)
+            nazwa_badania = random.choice(badania_names)
 
-wizyty_ids = wizyty_file['ID_wizyty'].tolist()
-badania_names = badania_file['nazwa_badania'].tolist()
+            writer.writerow([ID_wizyty, nazwa_badania])
 
-# Recepty
-with open("dane_recepty.csv", mode="w", newline="") as recepty_csv:
-    writer = csv.writer(recepty_csv)
-    writer.writerow(["ID_recepty", "waznosc", "czy_wykupiona", "data_wystawienia", "id_wizyty"])
 
-    for i in range(100):
-        ID_recepty = fake.unique.random_int(100000000000000, 999999999999999)
-        waznosc = fake.random_int(30, 180, 30)
-        czy_wykupiona = fake.boolean()
-        data_wystawienia = fake.date_between(time_start, time_end)
-        id_wizyty = random.choice(wizyty_ids)
+generate_data(1)
 
-        writer.writerow([ID_recepty, waznosc, czy_wykupiona, data_wystawienia, id_wizyty])
+for file in os.listdir(".\\t1\\"):
+    if os.path.isfile(file) and file.endswith(".csv"):
+        shutil.copy(".\\t1\\" + file, ".\\t2\\" + file)
 
-# Zlecenia
-with open("dane_zlecen.csv", mode="w", newline="") as zlecenia_csv:
-    writer = csv.writer(zlecenia_csv)
-    writer.writerow(["ID_wizyty", "nazwa_badania"])
-
-    for i in range(1000):
-        ID_wizyty = random.choice(wizyty_ids)
-        nazwa_badania = random.choice(badania_names)
-
-        writer.writerow([ID_wizyty, nazwa_badania])
+generate_data(2)
 
 # Oświadczamy, że treści wygenerowane przy pomocy z GenAI poddałyśmy krytycznej analizie i zweryfikowałyśmy.
 # Korzystałyśmy za zgodą prowadzącego z następujących narzędzi o potencjalnie wysokim stopniu ingerencji:
