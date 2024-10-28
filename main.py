@@ -137,9 +137,7 @@ with open("dane_badania.csv", mode="w", newline="") as badania_csv:
     writer = csv.writer(badania_csv)
     writer.writerow(["nazwa_badania", "czas_trwania", "koszt"])
 
-    test_names_provider = DynamicProvider(
-        provider_name="test_name",
-        elements=[
+    badania=[
             "morfologia krwi",
             "tomografia komputerowa",
             "badanie moczu",
@@ -171,13 +169,11 @@ with open("dane_badania.csv", mode="w", newline="") as badania_csv:
             "posiew bakteryjny",
             "test na infekcje",
             "badanie hormonów"
-        ],
-    )
+        ]
 
-    fake.add_provider(test_names_provider)
 
-    for i in range(100):
-        nazwa_badania = fake.test_name()
+    for i in range(len(badania)):
+        nazwa_badania = badania[i]
         czas_trwania = fake.random_int(5, 300, 5)
         koszt = biased_random_int(0, 10000)
         
