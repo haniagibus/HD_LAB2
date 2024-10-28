@@ -92,6 +92,15 @@ def generate_random_time_within_range(start_hour=7, end_hour=19):
     return f"{hour:02d}:{minute:02d}"
 
 
+def biased_random_int(low, high, bias=0.9):
+    if random.random() < bias:
+        # generate low number
+        return fake.random_int(min=low, max=(low + high) // 8)
+    else:
+        # generate high number
+        return fake.random_int(min=(low + high) // 8 + 1, max=high)
+
+
 # czas
 t1_start = datetime.strptime('2018-01-01', '%Y-%m-%d').date()
 t1_end = datetime.strptime('2022-01-01', '%Y-%m-%d').date()
@@ -107,8 +116,8 @@ else:
 
 existing_ids = set()
 
-pracownicy = openpyxl.load_workbook("pracownicy.xlsx")
-sheet = pracownicy.active
+excel = openpyxl.load_workbook("excel_dyrektora.xlsx")
+pracownicy = excel.get_sheet_by_name("Pracownicy")
 
 # Pacjenci
 with open("dane_pacjenci.csv", mode="w", newline="") as pacjenci_csv:
@@ -131,7 +140,7 @@ with open("dane_lekarze.csv", mode="w", newline="") as lekarze_csv:
     writer = csv.writer(lekarze_csv)
     writer.writerow(["Identyfikator", "Imię", "Nazwisko", "Specjalizacja"])
 
-    for row in sheet.iter_rows(min_row=2, values_only=True):
+    for row in pracownicy.iter_rows(min_row=2, values_only=True):
         identyfikator, pesel, imie, nazwisko, data_urodzenia, stanowisko, data_zatrudnienia, data_zwolnienia = row
         if stanowisko == 'lekarz':
             specjalizacja = fake.medical_specialization()
@@ -142,18 +151,7 @@ pacjenci_file = pd.read_csv("dane_pacjenci.csv", encoding="windows-1250")
 id_wszyscy_pacjenci = pacjenci_file['ID_pacjenta'].tolist()
 id_wszyscy_lekarze = lekarze_file['Identyfikator'].tolist()
 
-
-def biased_random_int(low, high, bias=0.9):
-    if random.random() < bias:
-        # generate low number
-        return fake.random_int(min=low, max=(low + high) // 8)
-    else:
-        # generate high number
-        return fake.random_int(min=(low + high) // 8 + 1, max=high)
-
-    # Badania
-
-
+# Badania
 with open("dane_badania.csv", mode="w", newline="") as badania_csv:
     writer = csv.writer(badania_csv)
     writer.writerow(["nazwa_badania", "czas_trwania", "koszt"])
@@ -201,7 +199,7 @@ with open("dane_badania.csv", mode="w", newline="") as badania_csv:
 
 # Wizyty
 recepcjonistki = []
-for row in sheet.iter_rows(min_row=2, values_only=True):
+for row in pracownicy.iter_rows(min_row=2, values_only=True):
     identyfikator, pesel, imie, nazwisko, data_urodzenia, stanowisko, data_zatrudnienia, data_zwolnienia = row
     if stanowisko == 'recepcja':
         recepcjonistki.append(identyfikator)

@@ -16,7 +16,7 @@ positions_provider = DynamicProvider(
 
 shifts_provider = DynamicProvider(
     provider_name="shift",
-    elements=["7:00-14:00", "10:00-17:00", "14:00-20:00"]
+    elements=["7:00-14:00", "10:00-17:00", "14:00-20:00", ""]
 )
 
 fake = Faker("pl_PL")
