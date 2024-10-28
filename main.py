@@ -118,7 +118,6 @@ with open("dane_lekarze.csv", mode="w", newline="") as lekarze_csv:
         if stanowisko=='lekarz':
             specjalizacja = fake.medical_specialization()
             writer.writerow([identyfikator, imie, nazwisko, specjalizacja])
-
 lekarze_file=pd.read_csv("dane_lekarze.csv", encoding="windows-1250")
 pacjenci_file=pd.read_csv("dane_pacjenci.csv", encoding="windows-1250")
 
@@ -213,28 +212,30 @@ with open("dane_wizyty.csv", mode="w", newline="") as wizyty_csv:
         ID_lekarza= random.choice(id_wszyscy_lekarze)
         writer.writerow([ID_wizyty, data_umowienia,dolegliwosci, kwota, godzina,czy_odbyta,ID_recepcjonistki,ID_pacjenta, ID_lekarza])
 
-        
+wizyty_file = pd.read_csv("dane_wizyty.csv", encoding='windows-1250')
+badania_file = pd.read_csv("dane_badania.csv", encoding='windows-1250')
+
+wizyty_ids = wizyty_file['ID_wizyty'].tolist()
+badania_names = badania_file['nazwa_badania'].tolist()
 #Recepty
 with open("dane_recepty.csv", mode="w", newline="") as recepty_csv:
     writer = csv.writer(recepty_csv)
+    writer.writerow(["ID_recepty", "waznosc", "czy_wykupiona", "data_wystawienia", "id_wizyty"])
 
     for i in range(100):
         ID_recepty = fake.unique.random_int(100000000000000, 999999999999999)
         waznosc = fake.random_int(30, 180, 30)
         czy_wykupiona = fake.boolean()
         data_wystawienia = fake.date_between((date.today() - timedelta(days=180)), date.today())
+        id_wizyty=random.choice(wizyty_ids)
 
-        writer.writerow([ID_recepty, waznosc, czy_wykupiona, data_wystawienia])
+        writer.writerow([ID_recepty, waznosc, czy_wykupiona, data_wystawienia, id_wizyty])
         
 #Zlecenia
-wizyty_file = pd.read_csv("dane_wizyty.csv", encoding='windows-1250')
-badania_file = pd.read_csv("dane_badania.csv", encoding='windows-1250')
-
-wizyty_ids = wizyty_file['ID_wizyty'].tolist()
-badania_names = badania_file['nazwa_badania'].tolist()
-
 with open("dane_zlecen.csv", mode="w", newline="") as zlecenia_csv:
     writer = csv.writer(zlecenia_csv)
+    writer.writerow(["ID_wizyty", "nazwa_badania"])
+
     for i in range(1000):
         ID_wizyty = random.choice(wizyty_ids)
         nazwa_badania = random.choice(badania_names)
