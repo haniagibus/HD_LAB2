@@ -24,6 +24,8 @@ fake.add_provider(positions_provider)
 fake.add_provider(shifts_provider)
 
 size=1000
+
+
 def generate_unique_identifier(existing_ids, length):
     while True:
         identifier = ''.join(random.choices(string.ascii_letters + string.digits, k=length))

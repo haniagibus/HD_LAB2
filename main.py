@@ -1,11 +1,8 @@
 import os
 import shutil
-from time import sleep
-
-import pandas as pd
 from faker import Faker
 from faker.providers import DynamicProvider
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta
 import csv
 import random
 import string
@@ -179,12 +176,10 @@ def generate_data(t):
 
         for row in pracownicy.iter_rows(min_row=2, values_only=True):
             identyfikator, pesel, imie, nazwisko, data_urodzenia, stanowisko, data_zatrudnienia, data_zwolnienia = row
-
-            if stanowisko == 'lekarz':
-                if identyfikator not in id_lekarzy:
-                    specjalizacja = fake.medical_specialization()
-                    id_lekarzy.append(identyfikator)
-                    writer.writerow([identyfikator, imie, nazwisko, specjalizacja])
+            if stanowisko == 'lekarz' and identyfikator not in id_lekarzy:
+                id_lekarzy.append(identyfikator)
+                specjalizacja = fake.medical_specialization()
+                writer.writerow([identyfikator, imie, nazwisko, specjalizacja])
 
     lekarze_file = pd.read_csv(dir + "dane_lekarze.csv", encoding="windows-1250")
     pacjenci_file = pd.read_csv(dir + "dane_pacjenci.csv", encoding="windows-1250")
@@ -197,6 +192,7 @@ def generate_data(t):
         writer = csv.writer(badania_csv)
         if t == 1:
             writer.writerow(["nazwa_badania", "czas_trwania", "koszt"])
+
             for i in range(len(badania)):
                 nazwa_badania = badania[i]
                 czas_trwania = fake.random_int(5, 300, 5)
