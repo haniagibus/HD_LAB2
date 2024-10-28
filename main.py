@@ -122,7 +122,6 @@ def generate_unique_identifier(existing_ids, length):
             existing_ids.add(identifier)
             return identifier
 
-
 def generate_random_time_within_range(start_hour=7, end_hour=19):
     """Generuje losowy czas w przedziale od start_hour do end_hour."""
     hour = random.randint(start_hour, end_hour)
