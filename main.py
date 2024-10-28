@@ -93,7 +93,7 @@ with open("dane_pacjenci.csv", mode="w", newline="") as pacjenci_csv:
         ID_pacjenta = fake.unique.random_int(100000000, 999999999)
         imie = fake.first_name()
         nazwisko = fake.last_name()
-        nr_telefonu = fake.phone_number()
+        nr_telefonu = fake.unique.numerify("### ### ###")
         miejscowosc = fake.city()
         ulica_i_numer_domu = fake.street_address()
         pesel = fake.unique.random_int(10000000000, 99999999999)
