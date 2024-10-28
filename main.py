@@ -102,8 +102,7 @@ with open("dane_pacjenci.csv", mode="w", newline="") as pacjenci_csv:
         pesel = fake.unique.random_int(10000000000, 99999999999)
 
         writer.writerow([ID_pacjenta, imie, nazwisko, nr_telefonu, miejscowosc, ulica_i_numer_domu, pesel])
-        
-dane_recepty=[]
+
 #Recepty
 with open("dane_recepty.csv", mode="w", newline="") as recepty_csv:
     writer = csv.writer(recepty_csv)
@@ -124,7 +123,6 @@ def biased_random_int(low, high, bias=0.9):
         # generate high number
         return fake.random_int(min=(low + high) // 8 + 1, max=high)        
 
-dane_badania=[]
 #Badania
 with open("dane_badania.csv", mode="w", newline="") as badania_csv:
     writer = csv.writer(badania_csv)
