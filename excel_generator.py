@@ -23,11 +23,6 @@ fake = Faker("pl_PL")
 fake.add_provider(positions_provider)
 fake.add_provider(shifts_provider)
 
-t1_start = datetime.strptime('2018-01-01', '%Y-%m-%d').date()
-t1_end = datetime.strptime('2022-01-01', '%Y-%m-%d').date()
-t2_start = datetime.strptime('2022-01-02', '%Y-%m-%d').date()
-t2_end = datetime.strptime('2024-01-01', '%Y-%m-%d').date()
-
 
 def generate_unique_identifier(existing_ids, length):
     while True:
@@ -40,8 +35,12 @@ def generate_unique_identifier(existing_ids, length):
 def generate_data(t):
     if t == 1:
         dir = ".\\t1\\"
+        time_start = datetime.strptime('2018-01-01', '%Y-%m-%d').date()
+        time_end = datetime.strptime('2022-01-01', '%Y-%m-%d').date()
     else:
         dir = ".\\t2\\"
+        time_start = datetime.strptime('2022-01-02', '%Y-%m-%d').date()
+        time_end = datetime.strptime('2024-01-01', '%Y-%m-%d').date()
 
     if t == 1:
         workbook = openpyxl.Workbook()
@@ -66,7 +65,7 @@ def generate_data(t):
             data_urodzenia = fake.date_between(start_date=datetime.strptime('1955-01-01', '%Y-%m-%d').date(),
                                                end_date=datetime.strptime('1997-01-01', '%Y-%m-%d').date())
             stanowisko = fake.position()
-            data_zatrudnienia = fake.date_between(data_urodzenia + timedelta(days=8760), end_date=t1_end)
+            data_zatrudnienia = fake.date_between(data_urodzenia + timedelta(days=8760), end_date=time_end)
             if random.choices([True, False], weights=[0.7, 0.3])[0]:  # 70% True, 30% False
                 data_zwolnienia = None
             else:
@@ -118,7 +117,7 @@ def generate_data(t):
             if stanowisko_komorka.value is None:
                 # 95% szansy na zwolnienie
                 if random.random() < 0.05:
-                    stanowisko_komorka.value = fake.date_time_between(t2_start, t2_end)
+                    stanowisko_komorka.value = fake.date_time_between(time_start, time_end)
 
         workbook.save(dir + "excel_dyrektora.xlsx")
 
