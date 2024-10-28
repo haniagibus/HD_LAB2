@@ -135,6 +135,7 @@ def biased_random_int(low, high, bias=0.9):
 
 
 existing_ids = set()
+id_lekarzy = []
 
 
 def generate_data(t):
@@ -178,9 +179,12 @@ def generate_data(t):
 
         for row in pracownicy.iter_rows(min_row=2, values_only=True):
             identyfikator, pesel, imie, nazwisko, data_urodzenia, stanowisko, data_zatrudnienia, data_zwolnienia = row
+
             if stanowisko == 'lekarz':
-                specjalizacja = fake.medical_specialization()
-                writer.writerow([identyfikator, imie, nazwisko, specjalizacja])
+                if identyfikator not in id_lekarzy:
+                    specjalizacja = fake.medical_specialization()
+                    id_lekarzy.append(identyfikator)
+                    writer.writerow([identyfikator, imie, nazwisko, specjalizacja])
 
     lekarze_file = pd.read_csv(dir + "dane_lekarze.csv", encoding="windows-1250")
     pacjenci_file = pd.read_csv(dir + "dane_pacjenci.csv", encoding="windows-1250")
@@ -193,13 +197,12 @@ def generate_data(t):
         writer = csv.writer(badania_csv)
         if t == 1:
             writer.writerow(["nazwa_badania", "czas_trwania", "koszt"])
+            for i in range(len(badania)):
+                nazwa_badania = badania[i]
+                czas_trwania = fake.random_int(5, 300, 5)
+                koszt = biased_random_int(0, 10000)
 
-        for i in range(len(badania)):
-            nazwa_badania = badania[i]
-            czas_trwania = fake.random_int(5, 300, 5)
-            koszt = biased_random_int(0, 10000)
-
-            writer.writerow([nazwa_badania, czas_trwania, koszt])
+                writer.writerow([nazwa_badania, czas_trwania, koszt])
 
     # Wizyty
     recepcjonistki = []
