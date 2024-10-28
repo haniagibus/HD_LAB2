@@ -109,6 +109,8 @@ badania = [
     "badanie hormonów"
 ]
 
+tableSize=200
+mainTableSize=1000
 
 def generate_unique_identifier(existing_ids, length):
     while True:
@@ -157,7 +159,7 @@ def generate_data(t):
             writer.writerow(["ID_pacjenta", "Imię", "Nazwisko", "Nr_telefonu",
                              "Miejscowość", "Ulica_i_numer_domu", "Pesel"])
 
-        for i in range(100):
+        for i in range(tableSize):
             ID_pacjenta = fake.unique.random_int(100000000, 999999999)
             imie = fake.first_name()
             nazwisko = fake.last_name()
@@ -212,7 +214,7 @@ def generate_data(t):
             writer.writerow(["ID_wizyty", "data_umówienia", "data_rozpoczecia", "dolegliwosci", "kwota", "godzina",
                              "czy_odbyta", "ID_recepcjonistki", "ID_pacjenta", "ID_lekarza"])
 
-        for i in range(1000):
+        for i in range(mainTableSize):
             ID_wizyty = generate_unique_identifier(existing_ids, 10)
             data_umowienia = fake.date_between(time_start, time_end - timedelta(days=180))
             data_rozpoczecia = fake.date_between(start_date=data_umowienia,
@@ -242,7 +244,7 @@ def generate_data(t):
         if t == 1:
             writer.writerow(["ID_recepty", "waznosc", "czy_wykupiona", "data_wystawienia", "id_wizyty"])
 
-        for i in range(100):
+        for i in range(tableSize):
             ID_recepty = fake.unique.random_int(100000000000000, 999999999999999)
             waznosc = fake.random_int(30, 180, 30)
             czy_wykupiona = fake.boolean()
@@ -257,7 +259,7 @@ def generate_data(t):
         if t == 1:
             writer.writerow(["ID_wizyty", "nazwa_badania"])
 
-        for i in range(1000):
+        for i in range(tableSize):
             ID_wizyty = random.choice(wizyty_ids)
             nazwa_badania = random.choice(badania_names)
 
@@ -266,9 +268,13 @@ def generate_data(t):
 
 generate_data(1)
 
-for file in os.listdir(".\\t1\\"):
-    if os.path.isfile(file) and file.endswith(".csv"):
-        shutil.copy(".\\t1\\" + file, ".\\t2\\" + file)
+src_dir = ".\\t1\\"
+dst_dir = ".\\t2\\"
+os.makedirs(dst_dir, exist_ok=True)
+
+for file in os.listdir(src_dir):
+    if file.endswith(".csv"):
+        shutil.copy(os.path.join(src_dir, file), os.path.join(dst_dir, file))
 
 generate_data(2)
 
