@@ -1,9 +1,10 @@
 from faker import Faker
 from faker.providers import DynamicProvider
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import csv
 import random
 import string
+import pandas as pd
 
 specjalization_provider = DynamicProvider(
      provider_name="medical_specialization",
@@ -123,6 +124,7 @@ def biased_random_int(low, high, bias=0.9):
 #Badania
 with open("dane_badania.csv", mode="w", newline="") as badania_csv:
     writer = csv.writer(badania_csv)
+    writer.writerow(["nazwa_badania", "czas_trwania", "koszt"])
 
     test_names_provider = DynamicProvider(
         provider_name="test_name",
@@ -168,7 +170,7 @@ with open("dane_badania.csv", mode="w", newline="") as badania_csv:
         czas_trwania = fake.random_int(5, 300, 5)
         koszt = biased_random_int(0, 10000)
         
-        writer.writerow([ID_pacjenta, imie, nazwisko, nr_telefonu, miejscowosc,ulica_i_numer_domu,pesel])
+        writer.writerow([nazwa_badania, czas_trwania, koszt])
 
 #Lekarze
 with open("dane_lekarze.csv", mode="w", newline="") as lekarze_csv:
@@ -190,18 +192,34 @@ for i in range(20):
 
 with open("dane_wizyty.csv", mode="w", newline="") as wizyty_csv:
     writer = csv.writer(wizyty_csv)
+    writer.writerow(["ID_wizyty", "data_umówienia", "data_rozpoczecia", "dolegliwosci", "kwota", "godzina", "czy_odbyta", "ID_recepcjonistki"])
+
     for i in range(1000):
         ID_wizyty = generate_unique_identifier(existing_ids,10)
-        data_umówienia = fake.date_between(start_date=start_date,end_date=end_date)
-        data_rozpoczęcia = fake.date_between(start_date= data_umówienia,end_date=data_umówienia + timedelta(days=180))
+        data_umowienia = fake.date_between(start_date=start_date,end_date=end_date)
+        data_rozpoczecia = fake.date_between(start_date= data_umowienia,end_date=data_umowienia + timedelta(days=180))
         dolegliwosci=fake.sentence(ext_word_list=my_sentence_list)
         assert len(dolegliwosci) <= 1000
         kwota=round(random.uniform(40, 600), 2)
         godzina = generate_random_time_within_range()
         czy_odbyta = random.choices(["TAK", "NIE"], weights=[0.7, 0.3], k=1)[0]
         ID_recepcjonistki= random.choice(recepcjonistki)
-        writer.writerow([ID_wizyty, data_umówienia,data_rozpoczęcia,dolegliwosci, kwota, godzina,czy_odbyta,ID_recepcjonistki])
+        writer.writerow([ID_wizyty, data_umowienia, data_rozpoczecia, dolegliwosci, kwota, godzina,czy_odbyta, ID_recepcjonistki])
 
+#Zlecenia
+wizyty_file = pd.read_csv("dane_wizyty.csv", encoding='windows-1250')
+badania_file = pd.read_csv("dane_badania.csv", encoding='windows-1250')
+
+wizyty_ids = wizyty_file['ID_wizyty'].tolist()
+badania_names = badania_file['nazwa_badania'].tolist()
+
+with open("dane_zlecen.csv", mode="w", newline="") as zlecenia_csv:
+    writer = csv.writer(zlecenia_csv)
+    for i in range(1000):
+        ID_wizyty = random.choice(wizyty_ids)
+        nazwa_badania = random.choice(badania_names)
+
+        writer.writerow([ID_wizyty, nazwa_badania])
 
 # Oświadczamy, że treści wygenerowane przy pomocy z GenAI poddałyśmy krytycznej analizie i zweryfikowałyśmy.
 # Korzystałyśmy za zgodą prowadzącego z następujących narzędzi o potencjalnie wysokim stopniu ingerencji:
