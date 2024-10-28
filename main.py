@@ -2,7 +2,6 @@ from faker import Faker
 from faker.providers import DynamicProvider
 from datetime import datetime, timedelta
 import csv
-from datetime import date, timedelta
 import random
 import string
 
@@ -77,7 +76,6 @@ def generate_unique_identifier(existing_ids, length):
             existing_ids.add(identifier)
             return identifier
 
-
 def generate_random_time_within_range(start_hour=7, end_hour=19):
     """Generuje losowy czas w przedziale od start_hour do end_hour."""
     hour = random.randint(start_hour, end_hour)
@@ -87,7 +85,6 @@ def generate_random_time_within_range(start_hour=7, end_hour=19):
 
 existing_ids = set()
 
-
 #Pacjenci
 with open("dane_pacjenci.csv", mode="w", newline="") as pacjenci_csv:
     writer = csv.writer(pacjenci_csv)
@@ -96,7 +93,7 @@ with open("dane_pacjenci.csv", mode="w", newline="") as pacjenci_csv:
         ID_pacjenta = fake.unique.random_int(100000000, 999999999)
         imie = fake.first_name()
         nazwisko = fake.last_name()
-        nr_telefonu = fake.phone_number()
+        nr_telefonu = fake.unique.numerify("### ### ###")
         miejscowosc = fake.city()
         ulica_i_numer_domu = fake.street_address()
         pesel = fake.unique.random_int(10000000000, 99999999999)
@@ -170,8 +167,8 @@ with open("dane_badania.csv", mode="w", newline="") as badania_csv:
         nazwa_badania = fake.test_name()
         czas_trwania = fake.random_int(5, 300, 5)
         koszt = biased_random_int(0, 10000)
-
-        writer.writerow([nazwa_badania, czas_trwania, koszt])
+        
+        writer.writerow([ID_pacjenta, imie, nazwisko, nr_telefonu, miejscowosc,ulica_i_numer_domu,pesel])
 
 #Lekarze
 with open("dane_lekarze.csv", mode="w", newline="") as lekarze_csv:
